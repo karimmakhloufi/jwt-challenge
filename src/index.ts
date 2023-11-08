@@ -31,7 +31,7 @@ const db = [
   { username: "bob", password: process.env.BOB_PASS, role: "member" },
 ];
 
-app.get("/", (req, res) => {
+app.get("/", (_, res) => {
   res.send(`
     <h1>Welcome</h1>
     <a href="/login">Login</a>
@@ -44,7 +44,7 @@ app.get("/", (req, res) => {
     `);
 });
 
-app.get("/login", (req, res) => {
+app.get("/login", (_, res) => {
   res.send(`
     <h1>Login</h1>
     <form action="/logmein" method="post">
@@ -123,7 +123,7 @@ app.get("/admin", (req, res) => {
   }
 });
 
-app.get("/logout", (req, res) => {
+app.get("/logout", (_, res) => {
   res.clearCookie("jwt");
   res.send(`<p>You are now logged out</p><a href="/">back</a>`);
 });
