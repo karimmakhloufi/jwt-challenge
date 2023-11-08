@@ -1,10 +1,17 @@
+import "dotenv/config";
 import express from "express";
-import { sign, verify } from "jsonwebtoken";
+import { Secret, sign, verify } from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 const app = express();
 const port = 4000;
 
-const jwtSecretKey = "agdq";
+let jwtSecretKey: Secret;
+
+if (process.env.SECRET_KEY && process.env.SECRET_KEY.length > 0) {
+  jwtSecretKey = process.env.SECRET_KEY;
+} else {
+  throw new Error("SECRET_KEY not set in .env");
+}
 
 type jwtPayload = {
   user: string;
@@ -20,8 +27,8 @@ app.use(
 app.use(cookieParser());
 
 const db = [
-  { username: "alice", password: "alicepass", role: "admin" },
-  { username: "bob", password: "bobpass", role: "member" },
+  { username: "alice", password: process.env.ALICE_PASS, role: "admin" },
+  { username: "bob", password: process.env.BOB_PASS, role: "member" },
 ];
 
 app.get("/", (req, res) => {
@@ -59,7 +66,7 @@ app.post("/logmein", (req, res) => {
       jwtSecretKey
     );
     res
-      .cookie("jwt", token)
+      .cookie("jwt", "Bearer " + token)
       .send(
         `<p>Logged in as ${userFromDB.username}</p><br/><a href="/">back</a>`
       );
@@ -71,7 +78,10 @@ app.post("/logmein", (req, res) => {
 app.get("/members", (req, res) => {
   console.log(req.cookies);
   try {
-    const tokenFromUser = verify(req.cookies.jwt, jwtSecretKey) as jwtPayload;
+    const tokenFromUser = verify(
+      req.cookies.jwt.split("Bearer ")[1],
+      jwtSecretKey
+    ) as jwtPayload;
     console.log("verified token", tokenFromUser);
     res.send(
       `
