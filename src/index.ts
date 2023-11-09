@@ -99,7 +99,10 @@ app.get("/members", (req, res) => {
 app.get("/admin", (req, res) => {
   console.log(req.cookies);
   try {
-    const tokenFromUser = verify(req.cookies.jwt, jwtSecretKey) as jwtPayload;
+    const tokenFromUser = verify(
+      req.cookies.jwt.split("Bearer ")[1],
+      jwtSecretKey
+    ) as jwtPayload;
     console.log("verified token", tokenFromUser);
     if (tokenFromUser.role === "admin") {
       res.send(
